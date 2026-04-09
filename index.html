@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peludos Factory 🐾 | Tu mascota en tu pijama</title>
+    <meta name="description" content="Pijamas 100% personalizadas con la carita de tu perro o gato. Únicas, suaves y hechas con amor en Perú.">
+    
+    <!-- Google Fonts Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-color: #F5F0E8; /* crema */
+            --primary-color: #E8721C; /* naranja */
+            --primary-hover: #C5611A; 
+            --text-color: #2C1810; /* marrón oscuro */
+            --white: #FFFFFF;
+        }
+
+        /* Base & Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 800;
+        }
+        
+        .font-semibold { font-weight: 600; }
+        .font-regular { font-weight: 400; }
+
+        /* General layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+        
+        .btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-color);
+            box-shadow: 0 4px 15px rgba(44, 24, 16, 0.05);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* HERO */
+        .hero {
+            margin-top: 60px; /* Offset for fixed navbar */
+            min-height: calc(100vh - 60px);
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #faecd7 100%);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 5vw, 64px);
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: clamp(18px, 2vw, 22px);
+            margin-bottom: 35px;
+            color: #4a3328;
+        }
+
+        .hero .btn {
+            font-size: 20px;
+            padding: 16px 40px;
+        }
+
+        /* ¿CÓMO FUNCIONA? */
+        .como-funciona {
+            background-color: var(--white);
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 36px;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .step-icon {
+            font-size: 48px;
+            background-color: var(--bg-color);
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .step h3 {
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+
+        /* CATÁLOGO */
+        .catalogo {
+            background-color: var(--bg-color);
+        }
+
+        .grid {
+            display: grid;
+            gap: 30px;
+            grid-template-columns: 1fr;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(44, 24, 16, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(44, 24, 16, 0.1);
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover img {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        /* FORMULARIO */
+        .pedido {
+            background-color: var(--white);
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(44, 24, 16, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0d8cc;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            color: var(--text-color);
+            background-color: var(--white);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .error-msg {
+            color: #d9381e;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .feedback-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            display: none;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: none;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            text-align: center;
+            padding: 30px 0;
+            font-size: 15px;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .steps-container {
+                flex-direction: row;
+            }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .nav-links {
+                display: none; /* Menu simple en móviles (oculto en este diseño base) */
+            }
+            .form-container {
+                padding: 25px;
+            }
+            section {
+                padding: 60px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVBAR -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo" data-target="hero">Peludos Factory 🐾</a>
+            <div class="nav-links">
+                <a href="#catalogo" id="link-productos" data-target="catalogo">Productos</a>
+                <a href="#como-funciona" id="link-comofunciona" data-target="como-funciona">¿Cómo funciona?</a>
+                <a href="#pedido" id="link-pedido" data-target="pedido">Pedir ahora</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. HERO -->
+    <header id="hero" class="hero">
+        <div class="container hero-content">
+            <h1>Tu mascota en tu pijama 🐾</h1>
+            <p>Pijamas 100% personalizadas con la carita de tu perro o gato. <br> Únicas, suaves y hechas con amor en Perú.</p>
+            <button class="btn scroll-to-form" data-target="pedido">Quiero la mía</button>
+        </div>
+    </header>
+
+    <!-- 3. ¿CÓMO FUNCIONA? -->
+    <section id="como-funciona" class="como-funciona">
+        <div class="container">
+            <h2 class="section-title">Así de fácil 🐶</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-icon">👕</div>
+                    <h3>1️⃣ Elige tu modelo</h3>
+                    <p>Polo, short, pijama completa o buzo.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">📸</div>
+                    <h3>2️⃣ Envíanos la foto</h3>
+                    <p>De tu mascota, lo más nítida posible.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🛵</div>
+                    <h3>3️⃣ Recíbela en casa</h3>
+                    <p>La diseñamos y te la enviamos a todo el Perú.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. CATÁLOGO -->
+    <section id="catalogo" class="catalogo">
+        <div class="container">
+            <h2 class="section-title">Nuestros modelos</h2>
+            <div class="grid">
+                <!-- Producto 1 -->
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="https://placedog.net/400/300?id=1" alt="Pijama Completa" loading="lazy">
+                    </div>
+                    <div class="card-content">
+                        <h3>Pijama Completa</h3>
+                        <p>Dos piezas con la carita de tu mascota.</p>
+                        <div class="card-footer">
+                            <span class="price">S/ 89.90</span>
+                            <button class="btn btn-elegir" data-producto="Pijama Completa">Elegir</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Producto 2 -->
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="https://placedog.net/400/300?id=2" alt="Polo Personalizado" loading="lazy">
+                    </div>
+                    <div class="card-content">
+                        <h3>Polo Personalizado</h3>
+                        <p>100% algodón, estampado en el pecho.</p>
+                        <div class="card-footer">
+                            <span class="price">S/ 45.00</span>
+                            <button class="btn btn-elegir" data-producto="Polo Personalizado">Elegir</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Producto 3 -->
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="https://placedog.net/400/300?id=3" alt="Short Estampado" loading="lazy">
+                    </div>
+                    <div class="card-content">
+                        <h3>Short Estampado</h3>
+                        <p>Cómodo y divertido para casa.</p>
+                        <div class="card-footer">
+                            <span class="price">S/ 35.00</span>
+                            <button class="btn btn-elegir" data-producto="Short Estampado">Elegir</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Producto 4 -->
+                <div class="card">
+                    <div class="card-img-container">
+                        <img src="https://placedog.net/400/300?id=4" alt="Buzo con Capucha" loading="lazy">
+                    </div>
+                    <div class="card-content">
+                        <h3>Buzo con Capucha</h3>
+                        <p>Abrigador con diseño full print.</p>
+                        <div class="card-footer">
+                            <span class="price">S/ 120.00</span>
+                            <button class="btn btn-elegir" data-producto="Buzo con Capucha">Elegir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. FORMULARIO DE PEDIDO -->
+    <section id="pedido" class="pedido">
+        <div class="container">
+            <h2 class="section-title">¿Lista para tu pedido? 🐾</h2>
+            
+            <div class="form-container">
+                <form id="orderForm" novalidate>
+                    <div class="form-group">
+                        <label for="nombre">Nombre completo *</label>
+                        <input type="text" id="nombre" class="form-control" required>
+                        <div class="error-msg" id="error-nombre">Por favor ingresa tu nombre completo</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="producto">Producto *</label>
+                        <select id="producto" class="form-control" required>
+                            <option value="">Selecciona un producto...</option>
+                            <option value="Pijama Completa">Pijama Completa</option>
+                            <option value="Polo Personalizado">Polo Personalizado</option>
+                            <option value="Short Estampado">Short Estampado</option>
+                            <option value="Buzo con Capucha">Buzo con Capucha</option>
+                        </select>
+                        <div class="error-msg" id="error-producto">Por favor selecciona un producto</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="talla">Talla *</label>
+                        <select id="talla" class="form-control" required>
+                            <option value="">Selecciona una talla...</option>
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                        <div class="error-msg" id="error-talla">Por favor selecciona tu talla</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notas">Notas adicionales</label>
+                        <textarea id="notas" class="form-control" placeholder="Referencia de foto, dirección, etc."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn submit-btn" id="btnSubmit">Enviar pedido</button>
+                    
+                    <div class="feedback-msg feedback-success" id="msgSuccess">
+                        ¡Pedido recibido! Te escribimos pronto 🐾
+                    </div>
+                    <div class="feedback-msg feedback-error" id="msgError">
+                        Algo salió mal, intenta de nuevo
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Peludos Factory — Hecho con amor y muchas patitas 🐾</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPT JS -->
+    <script>
+        // JS para el scroll suave
+        document.querySelectorAll('a[data-target], button[data-target]').forEach(element => {
+            element.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-target');
+                const targetSection = document.querySelector('#' + targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Eventos en botones del catálogo
+        const selectProducto = document.querySelector('#producto');
+        const formSection = document.querySelector('#pedido');
+
+        document.querySelectorAll('.btn-elegir').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productName = this.getAttribute('data-producto');
+                
+                // Establecer valor del select
+                selectProducto.value = productName;
+                // Remover error visual si existía
+                selectProducto.style.borderColor = '#e0d8cc';
+                document.querySelector('#error-producto').style.display = 'none';
+                
+                // Scroll hacia formulario
+                formSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Supabase Initialization
+        const supabaseUrl = 'https://xqyrtsqtxhlcjzydiijb.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxeXJ0c3F0eGhsY2p6eWRpaWpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTI2MTYsImV4cCI6MjA5MTMyODYxNn0.ow7l0gi6WiLE1nmVZCM3y-eK2GBHHMf9ESCTuzrpaBk';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Envío de formulario
+        const form = document.querySelector('#orderForm');
+        const inputNombre = document.querySelector('#nombre');
+        const inputTalla = document.querySelector('#talla');
+        const inputNotas = document.querySelector('#notas');
+        const btnSubmit = document.querySelector('#btnSubmit');
+        
+        const errNombre = document.querySelector('#error-nombre');
+        const errProducto = document.querySelector('#error-producto');
+        const errTalla = document.querySelector('#error-talla');
+        
+        const msgSuccess = document.querySelector('#msgSuccess');
+        const msgError = document.querySelector('#msgError');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Ocultar mensajes de resultado
+            msgSuccess.style.display = 'none';
+            msgError.style.display = 'none';
+
+            let isValid = true;
+            
+            // Validar campos
+            if (inputNombre.value.trim() === '') {
+                errNombre.style.display = 'block';
+                inputNombre.style.borderColor = '#d9381e';
+                isValid = false;
+            }
+
+            if (selectProducto.value === '') {
+                errProducto.style.display = 'block';
+                selectProducto.style.borderColor = '#d9381e';
+                isValid = false;
+            }
+
+            if (inputTalla.value === '') {
+                errTalla.style.display = 'block';
+                inputTalla.style.borderColor = '#d9381e';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Datos
+            const nombre_cliente = inputNombre.value.trim();
+            const producto = selectProducto.value;
+            const talla = inputTalla.value;
+            const notas = inputNotas.value.trim();
+
+            // Bloquear botón
+            btnSubmit.textContent = 'Enviando...';
+            btnSubmit.disabled = true;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('pedidos')
+                    .insert([{ nombre_cliente, producto, talla, notas }]);
+
+                if (error) throw error;
+
+                // Mostrar éxito y resetear
+                msgSuccess.style.display = 'block';
+                form.reset();
+            } catch (error) {
+                console.error(error);
+                // Mostrar error
+                msgError.style.display = 'block';
+            } finally {
+                // Desbloquear botón
+                btnSubmit.textContent = 'Enviar pedido';
+                btnSubmit.disabled = false;
+                
+                // Reiniciar bordes por seguridad
+                inputNombre.style.borderColor = '#e0d8cc';
+                selectProducto.style.borderColor = '#e0d8cc';
+                inputTalla.style.borderColor = '#e0d8cc';
+            }
+        });
+
+        // Limpieza de alertas al tipear/cambiar
+        inputNombre.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                this.style.borderColor = '#e0d8cc';
+                errNombre.style.display = 'none';
+            }
+        });
+
+        selectProducto.addEventListener('change', function() {
+            if (this.value !== '') {
+                this.style.borderColor = '#e0d8cc';
+                errProducto.style.display = 'none';
+            }
+        });
+
+        inputTalla.addEventListener('change', function() {
+            if (this.value !== '') {
+                this.style.borderColor = '#e0d8cc';
+                errTalla.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
